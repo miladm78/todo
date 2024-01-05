@@ -4,9 +4,13 @@ namespace App\Exceptions;
 
 use Exception;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -35,16 +39,33 @@ class Handler extends ExceptionHandler
     public function render($request, Exception|Throwable $exception)
     {
         if ($exception instanceof AuthenticationException){
+            return new JsonResponse([],Response::HTTP_UNAUTHORIZED);
+
+        }else if ($exception instanceof ValidationException){
             return new JsonResponse([
-                'message' => $exception->getMessage(),
-            ],Response::HTTP_UNAUTHORIZED);
+                'errors' => $exception->errors(),
+            ],Response::HTTP_BAD_REQUEST);
+
+        }else if ($exception instanceof MethodNotAllowedHttpException){
+            return new JsonResponse([],Response::HTTP_METHOD_NOT_ALLOWED);
+
+        }else if ($exception instanceof ModelNotFoundException){
+            return new JsonResponse([],Response::HTTP_NOT_FOUND);
+
+        }else if ($exception instanceof NotFoundHttpException){
+            return new JsonResponse([],Response::HTTP_NOT_FOUND);
 
         }else{
+            if (env('APP_DEBUG') === true){
+                return new JsonResponse([
+                    'type' => get_class($exception),
+                    'error' => $exception->getMessage(),
+                    'file' => $exception->getFile(),
+                    'line' => $exception->getLine(),
+                ],Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
             return new JsonResponse([
-                'type' => get_class($exception),
-                'message' => $exception->getMessage(),
-                'file' => $exception->getFile(),
-                'line' => $exception->getLine(),
+                'error' => trans('errors.internal_server'),
             ],Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

@@ -30,7 +30,7 @@ class AuthController extends Controller
         $user = User::where('email', $data['email'])->first();
         if (!$user || !Hash::check($data['password'], $user->password)) {
 
-            return new JsonResponse(['message' => trans('passwords.invalid')], Response::HTTP_UNAUTHORIZED);
+            return new JsonResponse(['error' => trans('passwords.invalid')], Response::HTTP_UNAUTHORIZED);
         }
 
         $token = $user->createToken($user->name . '-api-token')->plainTextToken;
@@ -41,6 +41,6 @@ class AuthController extends Controller
     public function logout(): JsonResponse
     {
         auth()->user()->tokens()->delete();
-        return new JsonResponse(['message' => trans('messages.logout')], Response::HTTP_OK);
+        return new JsonResponse([], Response::HTTP_NO_CONTENT);
     }
 }
