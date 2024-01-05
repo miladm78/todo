@@ -12,13 +12,13 @@ class TodoStatusUpdated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public int $task_id;
-    public bool $status;
+    public int $todo_id;
+    public bool $is_complete;
 
-    public function __construct($task_id, $status)
+    public function __construct($todo_id, $is_complete)
     {
-        $this->task_id = $task_id;
-        $this->status = $status;
+        $this->todo_id = $todo_id;
+        $this->is_complete = $is_complete;
     }
 
     /**
@@ -29,7 +29,7 @@ class TodoStatusUpdated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new Channel('tasks.' . $this->task_id),
+            new Channel('todos.' . $this->todo_id),
         ];
     }
 }
