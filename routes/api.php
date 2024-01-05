@@ -25,9 +25,7 @@ Route::controller(\App\Http\Controllers\AuthController::class)->group(function()
 
 Route::middleware('auth:sanctum')->group( function () {
     Route::post('logout', [\App\Http\Controllers\AuthController::class,'logout']);
-
+    Route::resource('todos',\App\Http\Controllers\TodoController::class);
+    Route::post('todos/complete/{todo}',[\App\Http\Controllers\TodoController::class,'make_complete_or_incomplete']);
 });
 
-//Route::post('register',[\App\Http\Controllers\AuthController::class,'register']);
-//Route::post('login',[\App\Http\Controllers\AuthController::class,'login']);
-//Route::post('logout',[\App\Http\Controllers\AuthController::class,'logout'])->middleware('auth:sanctum');
