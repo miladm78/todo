@@ -2,7 +2,11 @@
 
 namespace App\Exceptions;
 
+use Exception;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -18,6 +22,7 @@ class Handler extends ExceptionHandler
         'password_confirmation',
     ];
 
+
     /**
      * Register the exception handling callbacks for the application.
      */
@@ -26,5 +31,21 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+    public function render($request, Exception|Throwable $exception)
+    {
+        if ($exception instanceof AuthenticationException){
+            return new JsonResponse([
+                'message' => $exception->getMessage(),
+            ],Response::HTTP_UNAUTHORIZED);
+
+        }else{
+            return new JsonResponse([
+                'type' => get_class($exception),
+                'message' => $exception->getMessage(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+            ],Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
